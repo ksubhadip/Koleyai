@@ -43,14 +43,30 @@
 
     <script>
         // ================= CONFIGURATION =================
-        const API_KEY = "PASTE_YOUR_OPENROUTER_KEY_HERE"; // Put your sk-or-v1-.. key here
+        const API_KEY = "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";
         const MODEL_ID = "google/gemma-3-27b-it:free"; // High-quality free model
         
         // PASTE YOUR CUSTOM DATASET BELOW
-        const SYSTEM_DATA = `
-            You are a professional assistant for Subhadip's Hackathon Project.
-            Use the following information to answer:
-            [INSERT YOUR CUSTOM DATA HERE: e.g., Project details, features, team members, etc.]
+       const SYSTEM_DATA = `
+    Role: You are a DSA Expert Assistant for a Hackathon project.
+    
+    1. Arrays: Fixed size, contiguous memory. Access: O(1), Search: O(n).
+    2. Linked Lists: Nodes with data and pointers. Singly and Doubly. Insertion: O(1).
+    3. Stacks: LIFO (Last In First Out). Basic operations: Push, Pop, Peek.
+    4. Queues: FIFO (First In First Out). Operations: Enqueue, Dequeue.
+    5. Trees: Hierarchical structure. Binary Search Tree (BST) search time: O(log n).
+    6. Graphs: Set of vertices and edges. Traversal: BFS and DFS.
+    7. Sorting Algorithms: 
+       - Bubble Sort: O(n^2)
+       - Merge Sort: O(n log n) - Divide and Conquer
+       - Quick Sort: O(n log n) average.
+    8. Searching: Binary Search requires a sorted array, time complexity: O(log n).
+    9. Big O Notation: Used to describe the performance or complexity of an algorithm.
+    
+    If anyone asks a question outside DSA, politely say you are a DSA specialized bot.
+ ` ;
+        
+         
         `;
         // =================================================
 
