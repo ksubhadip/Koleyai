@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal AI - Hackathon Edition</title>
+    <title>DSA Expert AI - Hackathon</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .message-bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; line-height: 1.5; font-size: 15px; }
         .user-msg { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .bot-msg { background-color: #f3f4f6; color: #1f2937; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #e5e7eb; }
-        #chat-box { height: calc(100vh - 140px); scroll-behavior: smooth; }
+        #chat-box { height: calc(100vh - 140px); scroll-behavior: smooth; display: flex; flex-direction: column; }
         .dot-pulse { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
     </style>
@@ -18,12 +18,12 @@
 
     <nav class="bg-white border-b px-4 py-3 flex justify-between items-center shadow-sm">
         <span class="text-xl font-bold text-gray-800">Universal <span class="text-blue-600">AI</span></span>
-        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">LIVE: HACKATHON</span>
+        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">LIVE: DSA EXPERT</span>
     </nav>
 
-    <div id="chat-box" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+    <div id="chat-box" class="flex-1 overflow-y-auto p-4 gap-4">
         <div class="bot-msg message-bubble">
-            Hello! I am your custom assistant for the hackathon. Ask me anything about the project!
+            Hello! I am your DSA Expert assistant. Ask me anything about Data Structures!
         </div>
     </div>
 
@@ -31,7 +31,7 @@
         <div class="max-w-4xl mx-auto flex gap-2">
             <input type="text" id="input-field" 
                 class="flex-1 border border-gray-300 rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all" 
-                placeholder="Ask your assistant...">
+                placeholder="Type your DSA question...">
             <button onclick="askAI()" id="send-btn" 
                 class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-transform active:scale-95 shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -43,32 +43,21 @@
 
     <script>
         // ================= CONFIGURATION =================
-        const API_KEY = "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";
-        const MODEL_ID = "google/gemma-3-27b-it:free"; // High-quality free model
+        const API_KEY = "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"; 
+        const MODEL_ID = "openai/gpt-oss-120b:free"; 
         
-        // PASTE YOUR CUSTOM DATASET BELOW
-       const SYSTEM_DATA = `
-    Role: You are a professional DSA Expert Assistant for Subhadip's Hackathon Project.
-    Instructions: Use the following technical data to answer queries. If a question is not related to DSA, say "I am a DSA specialized bot for this project."
-
-    DATASET:
-    1. Arrays: Fixed size, contiguous memory. Access: O(1), Search: O(n).
-    2. Linked Lists: Nodes with data and pointers. Insertion: O(1) at head.
-    3. Stacks: LIFO (Last In First Out). Ops: Push, Pop, Peek.
-    4. Queues: FIFO (First In First Out). Ops: Enqueue, Dequeue.
-    5. Trees: Hierarchical. BST search/insert: O(log n).
-    6. Graphs: Vertices and Edges. Traversal: BFS (Queue) and DFS (Stack/Recursion).
-    7. Sorting: 
-       - Bubble/Selection/Insertion: O(n^2)
-       - Merge/Quick/Heap: O(n log n)
-    8. Searching: Binary Search (requires sorted data): O(log n).
-    9. Big O: Describes worst-case time or space complexity.
-    10. Dynamic Programming: Solving complex problems by breaking them into subproblems.
-
-    Project Owner: Subhadip Koley.
-    Session: 2025-2029.
-`;
-        
+        const SYSTEM_DATA = `
+            Role: You are a DSA Expert Assistant for a Hackathon project.
+            
+            1. Arrays: Fixed size, Contiguous memory, Access O(1).
+            2. Linked Lists: Nodes with pointers, Insertion O(1).
+            3. Stacks: LIFO (Last In First Out).
+            4. Queues: FIFO (First In First Out).
+            5. Sorting: Merge/Quick Sort O(n log n).
+            6. Searching: Binary Search O(log n).
+            
+            If any question is asked outside DSA, politely say you are a DSA specialized bot.
+        `;
         // =================================================
 
         async function askAI() {
@@ -93,10 +82,9 @@
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${API_KEY}`,
+                        "Authorization": "Bearer " + API_KEY.trim(),
                         "Content-Type": "application/json",
-                        "HTTP-Referer": window.location.href, 
-                        "X-Title": "Hackathon Bot"
+                        "HTTP-Referer": window.location.origin
                     },
                     body: JSON.stringify({
                         model: MODEL_ID,
@@ -113,19 +101,20 @@
                 if (result.choices && result.choices[0]) {
                     const reply = result.choices[0].message.content;
                     box.innerHTML += `<div class="bot-msg message-bubble shadow-sm">${reply}</div>`;
+                } else if (result.error) {
+                    throw new Error(result.error.message);
                 } else {
-                    throw new Error("Invalid response");
+                    throw new Error("Invalid response from API");
                 }
 
             } catch (err) {
-                loader.innerText = "Error: Check your API Key in the code.";
+                loader.innerText = "Error: " + err.message;
                 loader.classList.remove('dot-pulse');
-                console.error(err);
+                console.error("API Error:", err);
             }
             box.scrollTop = box.scrollHeight;
         }
 
-        // Allow 'Enter' key to send
         document.getElementById('input-field').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') askAI();
         });
