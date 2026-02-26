@@ -1,123 +1,657 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSA Expert AI - Hackathon</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .message-bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; line-height: 1.5; font-size: 15px; }
-        .user-msg { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .bot-msg { background-color: #f3f4f6; color: #1f2937; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #e5e7eb; }
-        #chat-box { height: calc(100vh - 140px); scroll-behavior: smooth; display: flex; flex-direction: column; }
-        .dot-pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Universal AI Chat Interface (Static)</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Optional: Marked for markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* small tweaks */
+    html,body,#app { height:100%; }
+    /* message bubble max width */
+    .bubble { max-width: 68%; word-break: break-word; }
+    .sidebar-scroll { max-height: calc(100vh - 6rem); overflow:auto; }
+    /* scrollbar nicer in modern browsers */
+    .sidebar-scroll::-webkit-scrollbar { width:8px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius:4px; }
+    .code-block pre { white-space: pre-wrap; word-break: break-word; }
+  </style>
 </head>
-<body class="bg-gray-50 flex flex-col h-screen overflow-hidden">
-
-    <nav class="bg-white border-b px-4 py-3 flex justify-between items-center shadow-sm">
-        <span class="text-xl font-bold text-gray-800">Universal <span class="text-blue-600">AI</span></span>
-        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">LIVE: DSA EXPERT</span>
-    </nav>
-
-    <div id="chat-box" class="flex-1 overflow-y-auto p-4 gap-4">
-        <div class="bot-msg message-bubble">
-            Hello! I am your DSA Expert assistant. Ask me anything about Data Structures!
+<body class="bg-slate-50 text-slate-800" >
+  <div id="app" class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-80 bg-white border-r border-slate-200 flex flex-col">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="rounded-md bg-indigo-600 text-white w-10 h-10 flex items-center justify-center font-semibold">AI</div>
+          <div>
+            <div class="text-sm font-semibold">Universal AI</div>
+            <div class="text-xs text-slate-500">Static chat interface</div>
+          </div>
         </div>
-    </div>
-
-    <div class="p-4 bg-white border-t">
-        <div class="max-w-4xl mx-auto flex gap-2">
-            <input type="text" id="input-field" 
-                class="flex-1 border border-gray-300 rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all" 
-                placeholder="Type your DSA question...">
-            <button onclick="askAI()" id="send-btn" 
-                class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-transform active:scale-95 shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                </svg>
-            </button>
+        <div class="flex items-center gap-2">
+          <button id="btnNewChat" title="New chat" class="text-slate-600 hover:text-slate-900 p-2 rounded-md">
+            <!-- plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </button>
+          <button id="btnSettings" title="Settings" class="text-slate-600 hover:text-slate-900 p-2 rounded-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm8.5-3.5a1 1 0 0 0-.11-.47l-1.2-2.07a1 1 0 0 0-.95-.53l-2.36.3a8.02 8.02 0 0 0-1.9-1.1l-.36-2.34a1 1 0 0 0-.99-.84h-2.4a1 1 0 0 0-.99.84l-.36 2.34a8.02 8.02 0 0 0-1.9 1.1l-2.36-.3a1 1 0 0 0-.95.53L3.6 11.5a1 1 0 0 0-.11.47 1 1 0 0 0 .11.47l1.2 2.07a1 1 0 0 0 .95.53l2.36-.3c.6.4 1.25.73 1.9 1.1l.36 2.34a1 1 0 0 0 .99.84h2.4a1 1 0 0 0 .99-.84l.36-2.34c.65-.37 1.3-.7 1.9-1.1l2.36.3a1 1 0 0 0 .95-.53l1.2-2.07c.12-.16.18-.35.18-.53z"/></svg>
+          </button>
         </div>
+      </div>
+
+      <div class="px-3 py-2">
+        <input id="searchChats" type="search" placeholder="Search chats..." class="w-full rounded-md bg-slate-50 border border-slate-200 px-3 py-2 text-sm focus:outline-none" />
+      </div>
+
+      <div class="px-3 py-2 flex items-center gap-2 border-b border-slate-200">
+        <button id="btnExportAll" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-md">Export</button>
+        <label for="importFile" class="text-xs cursor-pointer bg-yellow-50 text-yellow-800 px-3 py-1 rounded-md">Import</label>
+        <input id="importFile" type="file" accept="application/json" class="hidden" />
+        <button id="btnClearAll" class="ml-auto text-xs text-red-600 hover:underline">Clear</button>
+      </div>
+
+      <div class="flex-1 overflow-auto sidebar-scroll px-2 py-2" id="chatsList">
+        <!-- chat items -->
+      </div>
+
+      <div class="px-3 py-3 border-t border-slate-200">
+        <div class="text-xs text-slate-500">Model:</div>
+        <div id="modelNameDisplay" class="text-sm font-medium">Not set</div>
+        <div class="text-xs text-slate-400 mt-1">OpenRouter-backed models supported</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col">
+      <!-- header -->
+      <header class="flex items-center justify-between px-6 py-3 border-b border-slate-200 bg-white">
+        <div class="flex items-center gap-4">
+          <button id="btnToggleSidebar" class="md:hidden text-slate-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div>
+            <div id="chatTitle" class="text-lg font-semibold">Welcome</div>
+            <div id="chatSubtitle" class="text-xs text-slate-500">Start a new chat or open one from the left</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btnRenameChat" class="text-sm text-slate-600 hover:text-slate-900 hidden">Rename</button>
+          <button id="btnDeleteChat" class="text-sm text-red-600 hover:underline hidden">Delete</button>
+        </div>
+      </header>
+
+      <!-- messages -->
+      <section id="messagesWrap" class="flex-1 overflow-auto p-6 bg-gradient-to-b from-slate-50 to-white">
+        <div id="messages" class="max-w-3xl mx-auto space-y-4">
+          <!-- message bubbles appended here -->
+          <div id="emptyState" class="text-center text-slate-400 mt-12">
+            <div class="text-2xl">👋 Say hi to your Universal AI</div>
+            <div class="mt-2">Use the input box below. Set your OpenRouter API key in Settings to get real responses.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- composer -->
+      <footer class="border-t border-slate-200 bg-white p-4">
+        <div class="max-w-3xl mx-auto flex flex-col gap-2">
+          <textarea id="inputBox" rows="2" placeholder="Type a message and press Enter (Shift+Enter for newline)..." class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm resize-none focus:outline-none"></textarea>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <button id="btnSend" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">Send</button>
+              <button id="btnSendMock" class="bg-slate-100 text-slate-700 px-3 py-2 rounded-md">Mock Reply</button>
+            </div>
+            <div class="ml-auto text-xs text-slate-500">Press Enter to send • Messages saved locally</div>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="modal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="bg-white rounded-lg shadow-lg max-w-xl w-full mx-4 z-10">
+      <div class="p-4 border-b flex items-center justify-between">
+        <div class="text-lg font-semibold">Settings</div>
+        <button id="modalClose" class="text-slate-600 hover:text-slate-900">Close</button>
+      </div>
+      <div class="p-4 space-y-4">
+        <div>
+          <label class="text-xs text-slate-500">OpenRouter API Key</label>
+          <input id="apiKeyInput" type="password" placeholder="sk-..." class="w-full mt-1 rounded-md border border-slate-200 px-3 py-2" />
+          <div class="text-xs text-slate-400 mt-1">Stored locally in your browser only.</div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-500">Custom Model Name</label>
+          <input id="modelInput" placeholder="e.g., gpt-4o-mini or openrouter/gpt-4o-mini" class="w-full mt-1 rounded-md border border-slate-200 px-3 py-2" />
+          <div class="text-xs text-slate-400 mt-1">Model name used for requests. If blank, default behavior is client-side mock responses.</div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="saveSettings" class="bg-indigo-600 text-white px-4 py-2 rounded-md">Save</button>
+          <button id="clearSettings" class="text-sm text-red-600">Clear</button>
+        </div>
+
+        <div class="text-sm text-slate-500">
+          Example OpenRouter endpoint: <code>https://api.openrouter.ai/v1/chat/completions</code> with <code>Authorization: Bearer &lt;YOUR_KEY&gt;</code>.
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // ================= CONFIGURATION =================
-        const API_KEY = "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"; 
-        const MODEL_ID = "openai/gpt-oss-120b:free"; 
-        
-        const SYSTEM_DATA = `
-            Role: You are a DSA Expert Assistant for a Hackathon project.
-            
-            1. Arrays: Fixed size, Contiguous memory, Access O(1).
-            2. Linked Lists: Nodes with pointers, Insertion O(1).
-            3. Stacks: LIFO (Last In First Out).
-            4. Queues: FIFO (First In First Out).
-            5. Sorting: Merge/Quick Sort O(n log n).
-            6. Searching: Binary Search O(log n).
-            
-            If any question is asked outside DSA, politely say you are a DSA specialized bot.
-        `;
-        // =================================================
+  <!-- Templates (hidden) -->
+  <template id="chatItemTpl">
+    <div class="chat-item flex items-center gap-3 p-3 rounded-md hover:bg-slate-50 cursor-pointer">
+      <div class="w-8 h-8 rounded-md bg-indigo-50 flex items-center justify-center text-indigo-700 font-semibold">AI</div>
+      <div class="flex-1 min-w-0">
+        <div class="chat-name text-sm font-medium truncate">Chat title</div>
+        <div class="chat-snippet text-xs text-slate-400 truncate">snippet</div>
+      </div>
+      <div class="text-xs text-slate-400 chat-time">time</div>
+    </div>
+  </template>
 
-        async function askAI() {
-            const input = document.getElementById('input-field');
-            const box = document.getElementById('chat-box');
-            const query = input.value.trim();
+  <template id="msgTplUser">
+    <div class="flex justify-end">
+      <div class="bubble bg-indigo-600 text-white p-3 rounded-lg rounded-br-none shadow-sm">
+        <div class="prose text-sm user-text"></div>
+        <div class="text-xs mt-2 text-white/80 flex gap-2 justify-end">
+          <button class="copy-btn text-white/90">Copy</button>
+        </div>
+      </div>
+    </div>
+  </template>
 
-            if (!query) return;
+  <template id="msgTplAI">
+    <div class="flex justify-start">
+      <div class="bubble bg-white p-3 rounded-lg rounded-bl-none shadow-sm border border-slate-100">
+        <div class="prose ai-text text-sm"></div>
+        <div class="text-xs mt-2 text-slate-400 flex gap-2 justify-end">
+          <button class="copy-btn">Copy</button>
+        </div>
+      </div>
+    </div>
+  </template>
 
-            // Display User Message
-            box.innerHTML += `<div class="user-msg message-bubble shadow-sm">${query}</div>`;
-            input.value = "";
-            box.scrollTop = box.scrollHeight;
+  <!-- Script at end of body -->
+  <script>
+  /* ===========================
+     Universal AI Chat Interface
+     Single-file static site
+     =========================== */
 
-            // Loading Indicator
-            const loader = document.createElement('div');
-            loader.className = 'bot-msg message-bubble dot-pulse';
-            loader.innerText = 'AI is thinking...';
-            box.appendChild(loader);
+  // Storage keys
+  const STORAGE_KEYS = {
+    CHATS: 'ui_chat_chats_v1',
+    SETTINGS: 'ui_chat_settings_v1',
+    ACTIVE: 'ui_chat_active_v1'
+  };
 
-            try {
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer " + API_KEY.trim(),
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": window.location.origin
-                    },
-                    body: JSON.stringify({
-                        model: MODEL_ID,
-                        messages: [
-                            { role: "system", content: SYSTEM_DATA },
-                            { role: "user", content: query }
-                        ]
-                    })
-                });
+  // DOM refs
+  const chatsListEl = document.getElementById('chatsList');
+  const btnNewChat = document.getElementById('btnNewChat');
+  const btnSettings = document.getElementById('btnSettings');
+  const modal = document.getElementById('modal');
+  const modalClose = document.getElementById('modalClose');
+  const saveSettings = document.getElementById('saveSettings');
+  const clearSettings = document.getElementById('clearSettings');
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const modelInput = document.getElementById('modelInput');
+  const modelNameDisplay = document.getElementById('modelNameDisplay');
 
-                const result = await response.json();
-                loader.remove();
+  const btnExportAll = document.getElementById('btnExportAll');
+  const importFile = document.getElementById('importFile');
+  const btnClearAll = document.getElementById('btnClearAll');
+  const searchChats = document.getElementById('searchChats');
 
-                if (result.choices && result.choices[0]) {
-                    const reply = result.choices[0].message.content;
-                    box.innerHTML += `<div class="bot-msg message-bubble shadow-sm">${reply}</div>`;
-                } else if (result.error) {
-                    throw new Error(result.error.message);
-                } else {
-                    throw new Error("Invalid response from API");
-                }
+  const messagesEl = document.getElementById('messages');
+  const inputBox = document.getElementById('inputBox');
+  const btnSend = document.getElementById('btnSend');
+  const btnSendMock = document.getElementById('btnSendMock');
 
-            } catch (err) {
-                loader.innerText = "Error: " + err.message;
-                loader.classList.remove('dot-pulse');
-                console.error("API Error:", err);
-            }
-            box.scrollTop = box.scrollHeight;
+  const chatTitle = document.getElementById('chatTitle');
+  const chatSubtitle = document.getElementById('chatSubtitle');
+
+  const btnRenameChat = document.getElementById('btnRenameChat');
+  const btnDeleteChat = document.getElementById('btnDeleteChat');
+
+  // templates
+  const chatItemTpl = document.getElementById('chatItemTpl');
+  const msgTplUser = document.getElementById('msgTplUser');
+  const msgTplAI = document.getElementById('msgTplAI');
+
+  // app state
+  let chats = []; // array of { id, title, messages: [{role,content,ts}], createdAt }
+  let activeChatId = null;
+  let settings = { apiKey: '', model: '' };
+
+  /* ---------- Utilities ---------- */
+  const uid = () => 'c_' + Math.random().toString(36).slice(2,9);
+  const nowISO = () => new Date().toISOString();
+  const saveToStorage = () => {
+    localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify(chats));
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    localStorage.setItem(STORAGE_KEYS.ACTIVE, activeChatId || '');
+  };
+  const loadFromStorage = () => {
+    try {
+      chats = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHATS) || '[]') || [];
+    } catch(e){ chats = []; }
+    try {
+      settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || '{}') || {};
+    } catch(e){ settings = {}; }
+    activeChatId = localStorage.getItem(STORAGE_KEYS.ACTIVE) || null;
+    if(!settings) settings = { apiKey: '', model: '' };
+  };
+
+  const formatTimeShort = (iso) => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString();
+    } catch(e){ return iso; }
+  };
+
+  /* ---------- Chat CRUD ---------- */
+  function createChat(title = 'New chat') {
+    const c = { id: uid(), title, messages: [], createdAt: nowISO(), updatedAt: nowISO() };
+    chats.unshift(c);
+    activeChatId = c.id;
+    saveToStorage();
+    renderSidebar();
+    renderActiveChat();
+  }
+
+  function deleteChat(id) {
+    const idx = chats.findIndex(c => c.id === id);
+    if(idx !== -1) chats.splice(idx,1);
+    if(activeChatId === id) activeChatId = chats.length ? chats[0].id : null;
+    saveToStorage();
+    renderSidebar();
+    renderActiveChat();
+  }
+
+  function renameChat(id, newTitle) {
+    const c = chats.find(x => x.id === id);
+    if(c){ c.title = newTitle; c.updatedAt = nowISO(); saveToStorage(); renderSidebar(); renderActiveChat(); }
+  }
+
+  function addMessageToChat(id, role, content) {
+    const c = chats.find(x => x.id === id);
+    if(!c) return;
+    c.messages.push({ role, content, ts: nowISO() });
+    c.updatedAt = nowISO();
+    saveToStorage();
+  }
+
+  function setActiveChat(id) {
+    activeChatId = id;
+    localStorage.setItem(STORAGE_KEYS.ACTIVE, activeChatId || '');
+    renderSidebar();
+    renderActiveChat();
+  }
+
+  /* ---------- Rendering ---------- */
+  function renderSidebar(filter = '') {
+    chatsListEl.innerHTML = '';
+    const filtered = chats.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()) || (c.messages && c.messages.some(m => m.content.toLowerCase().includes(filter.toLowerCase()))));
+    filtered.forEach(c => {
+      const node = chatItemTpl.content.cloneNode(true);
+      const item = node.querySelector('.chat-item');
+      item.dataset.id = c.id;
+      if(c.id === activeChatId) item.classList.add('bg-indigo-50');
+
+      node.querySelector('.chat-name').textContent = c.title;
+      const last = c.messages.length ? c.messages[c.messages.length-1] : null;
+      node.querySelector('.chat-snippet').textContent = last ? (last.content.slice(0,80).replace(/\n/g,' ')) : 'No messages yet';
+      node.querySelector('.chat-time').textContent = c.updatedAt ? (new Date(c.updatedAt)).toLocaleString() : '';
+      item.addEventListener('click', () => setActiveChat(c.id));
+      item.addEventListener('contextmenu', (ev) => {
+        ev.preventDefault();
+        // quick context: rename / delete
+        const action = confirm('Delete this chat? OK = delete, Cancel = rename');
+        if(action) deleteChat(c.id);
+        else {
+          const newTitle = prompt('New chat name', c.title);
+          if(newTitle) renameChat(c.id, newTitle);
         }
+      });
 
-        document.getElementById('input-field').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') askAI();
-        });
-    </script>
+      chatsListEl.appendChild(node);
+    });
+
+    // if none, show placeholder
+    if(filtered.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'p-4 text-sm text-slate-400';
+      empty.textContent = 'No chats yet. Click "New" to start.';
+      chatsListEl.appendChild(empty);
+    }
+
+    // update model display
+    modelNameDisplay.textContent = settings.model || 'Not set';
+  }
+
+  function clearMessagesArea() {
+    messagesEl.innerHTML = '';
+  }
+
+  function renderActiveChat() {
+    clearMessagesArea();
+    const chat = chats.find(c => c.id === activeChatId);
+    if(!chat) {
+      document.getElementById('emptyState').style.display = 'block';
+      chatTitle.textContent = 'Welcome';
+      chatSubtitle.textContent = 'Start a new chat or open one from the left';
+      btnRenameChat.classList.add('hidden');
+      btnDeleteChat.classList.add('hidden');
+      return;
+    }
+    document.getElementById('emptyState').style.display = 'none';
+    chatTitle.textContent = chat.title || 'Chat';
+    chatSubtitle.textContent = `${chat.messages.length} messages • ${formatTimeShort(chat.updatedAt)}`;
+    btnRenameChat.classList.remove('hidden');
+    btnDeleteChat.classList.remove('hidden');
+
+    // messages
+    chat.messages.forEach(m => {
+      appendMessageElement(m.role, m.content);
+    });
+
+    // scroll to bottom
+    setTimeout(()=> messagesEl.parentElement.scrollTop = messagesEl.parentElement.scrollHeight, 50);
+  }
+
+  /* ---------- Append message DOM ---------- */
+  function appendMessageElement(role, content, opts = {}) {
+    // opts: streaming (bool)
+    const tpl = role === 'user' ? msgTplUser : msgTplAI;
+    const node = tpl.content.cloneNode(true);
+    const wrapper = node.querySelector('.bubble');
+    const textEl = node.querySelector(role === 'user' ? '.user-text' : '.ai-text');
+    const copyBtn = node.querySelector('.copy-btn');
+
+    // render markdown for AI; for user too for nicer formatting
+    if(window.marked) {
+      textEl.innerHTML = marked.parse(content || '');
+    } else {
+      textEl.textContent = content;
+    }
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard?.writeText(content || '').then(()=> {
+        copyBtn.textContent = 'Copied';
+        setTimeout(()=> copyBtn.textContent = 'Copy', 1200);
+      }).catch(()=> {
+        copyBtn.textContent = 'Err';
+      });
+    });
+
+    messagesEl.appendChild(node);
+    messagesEl.parentElement.scrollTop = messagesEl.parentElement.scrollHeight;
+  }
+
+  /* ---------- Settings modal ---------- */
+  function openModal() {
+    apiKeyInput.value = settings.apiKey || '';
+    modelInput.value = settings.model || '';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  function closeModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+  // events
+  btnSettings.addEventListener('click', openModal);
+  modalClose.addEventListener('click', closeModal);
+  saveSettings.addEventListener('click', () => {
+    settings.apiKey = apiKeyInput.value.trim();
+    settings.model = modelInput.value.trim();
+    saveToStorage();
+    closeModal();
+    renderSidebar();
+    alert('Settings saved locally.');
+  });
+  clearSettings.addEventListener('click', () => {
+    if(!confirm('Clear saved API key and model?')) return;
+    settings = { apiKey: '', model: '' };
+    saveToStorage();
+    apiKeyInput.value = '';
+    modelInput.value = '';
+    renderSidebar();
+  });
+
+  // new chat
+  btnNewChat.addEventListener('click', () => createChat('New chat'));
+
+  // export/import/clear
+  btnExportAll.addEventListener('click', () => {
+    const data = { chats, settings, exportedAt: nowISO() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'universal-ai-chats.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  importFile.addEventListener('change', async (ev) => {
+    const f = ev.target.files[0];
+    if(!f) return;
+    try {
+      const txt = await f.text();
+      const data = JSON.parse(txt);
+      if(Array.isArray(data.chats)) {
+        // merge (prepend imported chats)
+        chats = data.chats.concat(chats);
+        settings = Object.assign(settings, data.settings || {});
+        saveToStorage();
+        renderSidebar();
+        renderActiveChat();
+        alert('Imported.');
+      } else {
+        alert('Invalid file format.');
+      }
+    } catch(e) {
+      alert('Import failed: ' + e.message);
+    }
+    importFile.value = '';
+  });
+
+  btnClearAll.addEventListener('click', () => {
+    if(!confirm('Delete all chats and settings from this browser?')) return;
+    chats = []; settings = { apiKey: '', model: '' }; activeChatId = null;
+    saveToStorage();
+    renderSidebar();
+    renderActiveChat();
+  });
+
+  searchChats.addEventListener('input', (ev) => renderSidebar(ev.target.value));
+
+  // rename/delete in header
+  btnRenameChat.addEventListener('click', () => {
+    const chat = chats.find(c => c.id === activeChatId);
+    if(!chat) return;
+    const newTitle = prompt('Rename chat', chat.title);
+    if(newTitle) renameChat(chat.id, newTitle);
+  });
+  btnDeleteChat.addEventListener('click', () => {
+    if(!confirm('Delete this chat?')) return;
+    deleteChat(activeChatId);
+  });
+
+  // message sending
+  btnSend.addEventListener('click', handleSend);
+  btnSendMock.addEventListener('click', handleMockReply);
+
+  inputBox.addEventListener('keydown', (ev) => {
+    if(ev.key === 'Enter' && !ev.shiftKey) {
+      ev.preventDefault();
+      handleSend();
+    }
+  });
+
+  function handleMockReply() {
+    if(!activeChatId) createChat('New chat');
+    const text = inputBox.value.trim();
+    if(!text) return;
+    addMessageToChat(activeChatId, 'user', text);
+    appendMessageElement('user', text);
+    inputBox.value = '';
+    // fake AI delay and reply
+    setTimeout(()=> {
+      const reply = "This is a mock reply. Set your OpenRouter API key in Settings to get real responses.";
+      addMessageToChat(activeChatId, 'assistant', reply);
+      appendMessageElement('assistant', reply);
+    }, 700);
+  }
+
+  async function handleSend() {
+    let text = inputBox.value.trim();
+    if(!text) return;
+    if(!activeChatId) createChat('New chat');
+
+    // push user message
+    addMessageToChat(activeChatId, 'user', text);
+    appendMessageElement('user', text);
+    inputBox.value = '';
+
+    // if no API key or model -> show mock suggestion response
+    if(!settings.apiKey || !settings.model) {
+      // gentle local assistant
+      const reply = `Tip: Save your OpenRouter API key and a model name in Settings to fetch real model responses.\n\nYour message was: "${text.slice(0,120)}"`;
+      addMessageToChat(activeChatId, 'assistant', reply);
+      appendMessageElement('assistant', reply);
+      return;
+    }
+
+    // send to OpenRouter chat completions
+    try {
+      const chat = chats.find(c => c.id === activeChatId);
+      // map messages to API format
+      const messagesForApi = chat.messages.map(m => {
+        // roles: user/assistant
+        return { role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content };
+      });
+
+      // show typing placeholder
+      const typingId = uid();
+      appendMessageElement('assistant', '...thinking...');
+      // attempt fetch
+      const endpoint = 'https://api.openrouter.ai/v1/chat/completions';
+      const body = {
+        model: settings.model,
+        messages: messagesForApi.map(m => ({ role: m.role, content: m.content })),
+        // you can expose more params if desired
+        // temperature: 0.2,
+        // top_p: 0.95,
+      };
+
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + settings.apiKey
+        },
+        body: JSON.stringify(body)
+      });
+
+      if(!resp.ok) {
+        const txt = await resp.text();
+        removeTypingPlaceholder();
+        const errMsg = `API error: ${resp.status} ${resp.statusText}\n${txt}`;
+        addMessageToChat(activeChatId, 'assistant', errMsg);
+        appendMessageElement('assistant', errMsg);
+        return;
+      }
+
+      // parse JSON response format per OpenRouter spec (similar to OpenAI)
+      const data = await resp.json();
+      // try to extract assistant message
+      let assistantText = '';
+
+      // Common shapes: data.choices[0].message.content OR data.output[0].content
+      if(data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+        assistantText = data.choices[0].message.content;
+      } else if(data.output && data.output[0] && data.output[0].content) {
+        assistantText = data.output[0].content;
+      } else if(typeof data.choices?.[0]?.text === 'string') {
+        assistantText = data.choices[0].text;
+      } else {
+        assistantText = JSON.stringify(data, null, 2);
+      }
+
+      removeTypingPlaceholder();
+      addMessageToChat(activeChatId, 'assistant', assistantText);
+      appendMessageElement('assistant', assistantText);
+    } catch (err) {
+      removeTypingPlaceholder();
+      const errMsg = 'Network / request failed: ' + (err.message || String(err));
+      addMessageToChat(activeChatId, 'assistant', errMsg);
+      appendMessageElement('assistant', errMsg);
+    }
+  }
+
+  function removeTypingPlaceholder() {
+    // remove last assistant "thinking..." bubble if exists
+    const aiBubbles = Array.from(messagesEl.querySelectorAll('.bubble'));
+    for(let i = aiBubbles.length - 1; i >= 0; i--) {
+      const b = aiBubbles[i];
+      if(b.textContent.includes('...thinking...')) {
+        b.parentElement.remove();
+        break;
+      }
+    }
+  }
+
+  /* ---------- Init ---------- */
+  function init() {
+    loadFromStorage();
+    if(!chats || chats.length === 0) {
+      // seed example chat
+      chats = [{
+        id: uid(),
+        title: 'Getting started',
+        messages: [
+          { role: 'assistant', content: 'Welcome! Click "New" to start a fresh chat. Open Settings to add your OpenRouter API key and a model name for real responses.', ts: nowISO() }
+        ],
+        createdAt: nowISO(),
+        updatedAt: nowISO()
+      }];
+      activeChatId = chats[0].id;
+      saveToStorage();
+    }
+
+    renderSidebar();
+    if(!activeChatId && chats.length) activeChatId = chats[0].id;
+    renderActiveChat();
+
+    // populate settings UI
+    apiKeyInput.value = settings.apiKey || '';
+    modelInput.value = settings.model || '';
+
+    // small responsive: toggle sidebar
+    const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    btnToggleSidebar.addEventListener('click', () => {
+      const aside = document.querySelector('aside');
+      aside.classList.toggle('hidden');
+    });
+  }
+
+  init();
+
+  // expose some helpers to console for debugging
+  window._UICHAT = {
+    createChat, deleteChat, renameChat, chats, settings, saveToStorage, loadFromStorage
+  };
+
+  </script>
 </body>
 </html>
